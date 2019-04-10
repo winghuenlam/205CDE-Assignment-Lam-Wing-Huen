@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GOLDEN PARTY HOUSE</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='CSS/styles.css')}}">
+        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>  
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+        <style>
+            body h1{
+                text-align: center;
+            }
+            
+            
+            body .menu{
+                margin-bottom: 50px;    
+            }
+            
+        </style>
+        
+    </head>
+    
+    <body>
+    
+        <header>
+            <div class="top">
+                
+                <a href="{{ url_for('home')}}"><img src="{{url_for('static', filename='IMG/logo.png')}}" height="70px", width="auto" alt="logo"></a>
+                
+                
+            <!-----navigation----->
+                
+            <div id="app">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
+                    
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    
+                    <div id="navbarNavDropdown" class="navbar-collapse collapse">
+                        
+                            <a class="navbar-brand" href="{{ url_for('bookingform')}}">Book Now</a>
+                            <ul class="navbar-nav  mr-auto">
+                
+                                <li class="nav-item">
+                                    <a class="nav-item nav-link" href="{{ url_for('home')}}">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-item nav-link" href="{{ url_for('rooms')}}">Room</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-item nav-link" href="{{ url_for('menu')}}">Menu</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-item nav-link" href="{{ url_for('pricing')}}">Pricing</a>
+                                </li>
+
+                                {% if session['username'] is defined %}
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded = "false">Member</a>
+                                        <div class="dropdown-menu" aria-labellebdy="navbarDropdown">
+                                            <a class="dropdown-item" href="{{ url_for('member_profile')}}">Profile</a>
+                                            <a class="dropdown-item" href="{{ url_for('member_booking_history')}}">Booking History</a>
+                                        </div>
+                                    </li>
+                                {% endif %}
+
+
+                                {% if session['staff'] is defined %}
+                                    <li class="nav-item">
+                                        <a class="nav-item nav-link" href="{{ url_for('booking_records')}}">Booking Records</a>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+                            <ul class="navbar-nav">
+
+                                <li class="nav-item">
+
+                                    {% if session['username'] or session['staff'] is defined %}
+                                        <a class="nav-link" href="{{ url_for('logout')}}">Log out</a>
+                                        {% else %}
+                                        <a class="nav-link" href="{{ url_for('login')}}">Login</a>
+                                    {% endif %}
+                                </li>
+                                
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>          
+        </header>
+            <!----end navigation---->
+				
+			
+			<!----body---->
+
+		<section id="main_content">
+
+            <h1>Catering Menu</h1><br>
+			
+			<p>
+				<b>We have 3 sets of set menu in total. Feel free to order any amount that is right for you from below!</b>
+			</p>
+
+            {% for i in range(facilityName|length) %}
+
+            <div class="menu">
+
+                <form action = "http://localhost:5000/menu/staff/change_price" method = "POST">
+                    <!--Form for changing price-->
+
+                    <div class="row mb-3">  
+                       <div style="margin-left: 15px;">
+                            <h3>{{facilityName[i]}} $ </h3>
+                        </div>
+
+                        <div class="col-md-2" style="padding-left: 10px;">
+
+                            <input type="text" name="menuName" style="display: none;" value="{{facilityName[i]}}" readonly>
+
+                            <input type="text" class="form-control" name="changePrice" value="{{price[i]}}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Price</button>
+                    </div>
+                </form>
+
+
+                <table class="table table-sm">
+                    <tr> <th>FOOD ITEM</th> <th>QUANTITY</th></tr>
+                    {% for x in range(menu[i]["item"]|length) %}
+
+                        <form action = "http://localhost:5000/menu/staff/delete" method = "POST"> <!--Form for deleting item-->
+
+                            <tr> <td>{{menu[i]["item"][x]}}</td>  
+                                <td>{{menu[i]["qty"][x]}} {{menu[i]["unit"][x]}}</td>
+                                <td><button type="submit" class="btn btn-secondary">Delete</button></td>
+                                <td style="display: none;">
+                                    <input type="text" name="delMenuName" value="{{menuName[i]}}" readonly>
+                                    <input type="text" name="delItemID" value="{{menu[i]['id'][x]}}" readonly>
+                                </td>
+                            </tr>
+
+                        </form>
+
+                    {% endfor %}
+                </table>
+
+
+                <form action = "http://localhost:5000/menu/staff/add" method = "POST">
+                    <!--Form for adding item-->
+                    
+                    <input type="text" name="addMenuName" style="display: none;" value="{{menuName[i]}}" readonly>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-1">
+                            <input type="text" class="form-control" name="addItemName" placeholder="Item Name" required>
+                        </div>
+                    
+                        <div class="col-md-2" style="padding-right: 5px;">
+                            <input type="text" class="form-control" name="addItemQty" placeholder="Quantity" required>
+                        </div>
+
+                        <div class="col-md-2" style="padding-left: 0;">
+                            <input type="text" class="form-control" name="addItemUnit" placeholder="Unit" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>            
+
+                </form>
+                
+            </div>
+
+            {% endfor %}
+
+        
+            
+		</section>
+		
+		
+		
+
+	</body>
+</html>
